@@ -15,7 +15,7 @@ class ApiService {
     : _httpClient = httpClient ?? http.Client();
 
   String _buildUrl(NewsCategory category) {
-    if (category == NewsCategory.general) {
+    if (category == NewsCategory.general) { 
       return '${_baseUrl}top-headlines?q=keyword&apiKey=$_apiKey';
     } else {
       final categoryName = category.toString().split('.').last;

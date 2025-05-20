@@ -6,7 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:news_flash/data/enum/news_category.dart';
 import 'package:news_flash/models/news_response_model.dart';
-import 'package:news_flash/services/api_service.dart';
+import 'package:news_flash/data/services/api_service.dart';
 
 @GenerateMocks([http.Client])
 import 'api_service_test.mocks.dart';

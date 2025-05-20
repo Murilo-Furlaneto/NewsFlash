@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:news_flash/view/home/home_view.dart';
 import 'package:news_flash/view/splash_screen.dart';
 
 class AppRoutes {
@@ -8,7 +9,7 @@ class AppRoutes {
 
   Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
-    // home: (context) => const HomeScreen(),
+    home: (context) => const HomeView(),
     // newsDetails: (context) => const NewsDetailsScreen(),
   };
 }
