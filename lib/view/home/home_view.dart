@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:news_flash/data/enum/news_category.dart';
 import 'package:news_flash/data/getIt/init_get_it.dart';
+import 'package:news_flash/data/helper/date_helper.dart';
+import 'package:news_flash/data/helper/string_helper.dart';
 import 'package:news_flash/data/repository/news_repository.dart';
 import 'package:news_flash/models/article_model.dart';
 import 'package:news_flash/models/news_response_model.dart';
@@ -55,7 +57,7 @@ class _HomeViewState extends State<HomeView> {
               (context, innerBoxScrolled) => [
                 SliverAppBar(
                   title: const Text(
-                    'Notícias',
+                    'News',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   floating: true,
@@ -78,7 +80,7 @@ class _HomeViewState extends State<HomeView> {
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar notícias...',
+                          hintText: 'Search news...',
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon:
                               _searchController.text.isNotEmpty
@@ -125,7 +127,7 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(height: 8),
                         const SizedBox(height: 10),
                         const Text(
-                          "Últimas notícias",
+                          "Latest News",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -135,7 +137,6 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(height: 5),
                         Expanded(
                           child: ListView.builder(
-                        
                             itemCount: value.newsCategory.length,
                             itemBuilder: (context, index) {
                               return Padding(
@@ -143,24 +144,17 @@ class _HomeViewState extends State<HomeView> {
                                 child: Container(
                                   height: 100,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color:
-                                        Colors.grey[200], // mudar para white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    color: Colors.grey[200], // change to white,
                                   ),
                                   child: Row(
                                     children: [
                                       SizedBox(
                                         height: 70,
-                                        width: 70,
-                                        child: ClipRRect(
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(25),
-                                            bottomLeft: Radius.circular(25),
-                                          ),
-                                          child: Image.network(
-                                            'https://agenciapnz.com/wp-content/uploads/Logo-Google-G.png',
-                                            fit: BoxFit.cover,
-                                          ),
+                                        width: 90,
+                                        child: Image.network(
+                                          '${value.newsCategory[index].urlToImage}',
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
                                       const SizedBox(width: 10),
@@ -173,18 +167,9 @@ class _HomeViewState extends State<HomeView> {
                                           children: [
                                             Text(
                                               value
-                                                  .newsCategory[index]
-                                                  .category,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.blue,
-                                              ),
-                                            ),
-                                            Text(
-                                              value
-                                                  .newsCategory[index]
-                                                  .description,
+                                                      .newsCategory[index]
+                                                      .description ??
+                                                  'Description not available',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -194,7 +179,21 @@ class _HomeViewState extends State<HomeView> {
                                             ),
                                             const SizedBox(height: 5),
                                             Text(
-                                              value.newsCategory[index].id,
+                                              StringHelper.formatNewsSource(
+                                                value
+                                                        .newsCategory[index]
+                                                        .source
+                                                        .id ??
+                                                    'Unknown source',
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text(
+                                              "${DateHelper.formatPublicationTimeDifference(value.newsCategory[index].publishedAt)}  ago",
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.grey,
@@ -227,15 +226,15 @@ class _HomeViewState extends State<HomeView> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explorar'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Salvos'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         onTap: (index) {
           setState(() {
             _currentPage = index;
           });
-          // Adicione lógica de navegação conforme necessário
+          // Add navigation logic as needed
         },
       ),
     );

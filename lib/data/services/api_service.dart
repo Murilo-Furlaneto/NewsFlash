@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:news_flash/data/enum/news_category.dart';
 import 'package:news_flash/data/helper/category_helper.dart';
-import 'package:news_flash/models/news_response_model.dart';
+import 'package:news_flash/models/article_model.dart';
 
 class ApiService {
   final http.Client _httpClient;
@@ -18,8 +18,7 @@ class ApiService {
   String _buildUrl(NewsCategory category) {
     final String categoryName = CategoryHelper().convertCategoryName(category);
     if (category == NewsCategory.general) {
-      String url =
-          '${_baseUrl}top-headlines/sources?category=$categoryName&apiKey=$_apiKey';
+      String url = '${_baseUrl}top-headlines?country=us&apiKey=$_apiKey';
       return url;
     } else {
       String url =
@@ -28,7 +27,7 @@ class ApiService {
     }
   }
 
-  Future<List<NewsResponse>> getNewsByCategory(NewsCategory category) async {
+  Future<List<Article>> getNewsByCategory(NewsCategory category) async {
     final String categoryName =
         CategoryHelper().convertCategoryName(category).capitalize();
     final methodName = 'get${categoryName}News';
@@ -41,7 +40,7 @@ class ApiService {
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonData = json.decode(response.body);
 
-        return NewsResponse.fromJsonList(jsonData);
+        return Article.fromList(jsonData["articles"]);
       } else {
         _logError(
           "$methodName - Falha com código de status: ${response.statusCode}",
@@ -67,31 +66,31 @@ class ApiService {
     log("[ApiService] $message");
   }
 
-  Future<List<NewsResponse>> getNews() {
+  Future<List<Article>> getNews() {
     return getNewsByCategory(NewsCategory.general);
   }
 
-  Future<List<NewsResponse>> getBusinessNews() {
+  Future<List<Article>> getBusinessNews() {
     return getNewsByCategory(NewsCategory.business);
   }
 
-  Future<List<NewsResponse>> getEntertainmentNews() {
+  Future<List<Article>> getEntertainmentNews() {
     return getNewsByCategory(NewsCategory.entertainment);
   }
 
-  Future<List<NewsResponse>> getHealthNews() {
+  Future<List<Article>> getHealthNews() {
     return getNewsByCategory(NewsCategory.health);
   }
 
-  Future<List<NewsResponse>> getScienceNews() {
+  Future<List<Article>> getScienceNews() {
     return getNewsByCategory(NewsCategory.science);
   }
 
-  Future<List<NewsResponse>> getTechnologyNews() {
+  Future<List<Article>> getTechnologyNews() {
     return getNewsByCategory(NewsCategory.technology);
   }
 
-  Future<List<NewsResponse>> getSportsNews() {
+  Future<List<Article>> getSportsNews() {
     return getNewsByCategory(NewsCategory.sports);
   }
 

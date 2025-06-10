@@ -1,13 +1,13 @@
 import 'dart:developer';
-import 'package:news_flash/models/news_response_model.dart';
 import 'package:news_flash/data/services/api_service.dart';
+import 'package:news_flash/models/article_model.dart';
 
 class NewsRepository {
   final ApiService _apiService;
 
   NewsRepository(this._apiService);
 
-  Future<List<NewsResponse>> getNews() async {
+  Future<List<Article>> getNews() async {
     try {
       return await _apiService.getNews();
     } catch (e) {
@@ -16,7 +16,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getBusinessNews() async {
+  Future<List<Article>> getBusinessNews() async {
     try {
       return await _apiService.getBusinessNews();
     } catch (e) {
@@ -25,7 +25,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getEntertainmentNews() async {
+  Future<List<Article>> getEntertainmentNews() async {
     try {
       return await _apiService.getEntertainmentNews();
     } catch (e) {
@@ -34,7 +34,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getHealthNews() async {
+  Future<List<Article>> getHealthNews() async {
     try {
       return await _apiService.getHealthNews();
     } catch (e) {
@@ -43,7 +43,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getScienceNews() async {
+  Future<List<Article>> getScienceNews() async {
     try {
       return await _apiService.getScienceNews();
     } catch (e) {
@@ -52,7 +52,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getSportsNews() async {
+  Future<List<Article>> getSportsNews() async {
     try {
       return await _apiService.getSportsNews();
     } catch (e) {
@@ -61,7 +61,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<NewsResponse>> getTechnologyNews() async {
+  Future<List<Article>> getTechnologyNews() async {
     try {
       return await _apiService.getTechnologyNews();
     } catch (e) {

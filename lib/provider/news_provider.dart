@@ -3,6 +3,7 @@ import 'package:news_flash/data/enum/news_category.dart';
 import 'package:news_flash/data/repository/news_repository.dart';
 import 'package:news_flash/data/services/api_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:news_flash/models/article_model.dart';
 import 'package:news_flash/models/news_response_model.dart';
 
 class NewsProvider extends ChangeNotifier {
@@ -10,8 +11,8 @@ class NewsProvider extends ChangeNotifier {
     ApiService(httpClient: http.Client()),
   );
 
-  final List<NewsResponse> _newsCategory = [];
-  List<NewsResponse> get newsCategory => _newsCategory;
+  final List<Article> _newsCategory = [];
+  List<Article> get newsCategory => _newsCategory;
   NewsCategory _currentCategory = NewsCategory.general;
   NewsCategory get currentCategory => _currentCategory;
 
@@ -31,7 +32,7 @@ class NewsProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<List<NewsResponse>> fetchNews(NewsCategory category) async {
+  Future<List<Article>> fetchNews(NewsCategory category) async {
     _currentCategory = category;
     _isLoading = true;
     notifyListeners();
@@ -51,7 +52,7 @@ class NewsProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<NewsResponse>> _fetchNewsByCategory(NewsCategory category) async {
+  Future<List<Article>> _fetchNewsByCategory(NewsCategory category) async {
     switch (category) {
       case NewsCategory.business:
         return _newsRepository.getBusinessNews();
