@@ -15,31 +15,34 @@ class ApiService {
   ApiService({required http.Client? httpClient})
     : _httpClient = httpClient ?? http.Client();
 
-  String _buildUrl(NewsCategory category) {
+  String _buildUrl(NewsCategory category, int page) {
     final String categoryName = CategoryHelper().convertCategoryName(category);
     if (category == NewsCategory.general) {
-      String url = '${_baseUrl}top-headlines?country=us&apiKey=$_apiKey';
+      String url =
+          '${_baseUrl}everything?q=$categoryName&page=$page&apiKey=$_apiKey';
       return url;
     } else {
       String url =
-          '${_baseUrl}top-headlines/sources?category=$categoryName&apiKey=$_apiKey';
+          '${_baseUrl}everything?q=$categoryName&page=$page&apiKey=$_apiKey';
       return url;
     }
   }
 
-  Future<List<Article>> getNewsByCategory(NewsCategory category) async {
+  Future<List<Article>> getNewsByCategory(
+    NewsCategory category,
+    int page,
+  ) async {
     final String categoryName =
         CategoryHelper().convertCategoryName(category).capitalize();
     final methodName = 'get${categoryName}News';
 
     try {
-      final response = await _httpClient
-          .get(Uri.parse(_buildUrl(category)))
-          .timeout(const Duration(seconds: 10));
+      final response = await _httpClient.get(
+        Uri.parse(_buildUrl(category, page)),
+      );
 
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonData = json.decode(response.body);
-
         return Article.fromList(jsonData["articles"]);
       } else {
         _logError(
@@ -66,32 +69,32 @@ class ApiService {
     log("[ApiService] $message");
   }
 
-  Future<List<Article>> getNews() {
-    return getNewsByCategory(NewsCategory.general);
+  Future<List<Article>> getNews(int page) {
+    return getNewsByCategory(NewsCategory.general, page);
   }
 
-  Future<List<Article>> getBusinessNews() {
-    return getNewsByCategory(NewsCategory.business);
+  Future<List<Article>> getBusinessNews(int page) {
+    return getNewsByCategory(NewsCategory.business, page);
   }
 
-  Future<List<Article>> getEntertainmentNews() {
-    return getNewsByCategory(NewsCategory.entertainment);
+  Future<List<Article>> getEntertainmentNews(int page) {
+    return getNewsByCategory(NewsCategory.entertainment, page);
   }
 
-  Future<List<Article>> getHealthNews() {
-    return getNewsByCategory(NewsCategory.health);
+  Future<List<Article>> getHealthNews(int page) {
+    return getNewsByCategory(NewsCategory.health, page);
   }
 
-  Future<List<Article>> getScienceNews() {
-    return getNewsByCategory(NewsCategory.science);
+  Future<List<Article>> getScienceNews(int page) {
+    return getNewsByCategory(NewsCategory.science, page);
   }
 
-  Future<List<Article>> getTechnologyNews() {
-    return getNewsByCategory(NewsCategory.technology);
+  Future<List<Article>> getTechnologyNews(int page) {
+    return getNewsByCategory(NewsCategory.technology, page);
   }
 
-  Future<List<Article>> getSportsNews() {
-    return getNewsByCategory(NewsCategory.sports);
+  Future<List<Article>> getSportsNews(int page) {
+    return getNewsByCategory(NewsCategory.sports, page);
   }
 
   void dispose() {

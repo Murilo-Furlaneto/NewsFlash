@@ -16,5 +16,7 @@ void setUp() {
   );
 
   // Register providers
-  getIt.registerSingleton<NewsProvider>(NewsProvider());
+  getIt.registerSingleton<NewsProvider>(NewsProvider(NewsRepository(
+    ApiService(httpClient: http.Client()),
+  )));
 }

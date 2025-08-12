@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:news_flash/data/enum/news_category.dart';
-import 'package:news_flash/data/getIt/init_get_it.dart';
+import 'package:get_it/get_it.dart';
 import 'package:news_flash/data/helper/date_helper.dart';
 import 'package:news_flash/data/helper/string_helper.dart';
-import 'package:news_flash/data/repository/news_repository.dart';
 import 'package:news_flash/models/article_model.dart';
-import 'package:news_flash/models/news_response_model.dart';
 import 'package:news_flash/provider/news_provider.dart';
-import 'package:news_flash/widgtes/home/carrossel/carrossel_widget.dart';
 import 'package:news_flash/widgtes/home/carrossel/category_widget.dart';
-import 'package:provider/provider.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -22,14 +16,63 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
-  int _currentPage = 0;
-  final _newsProvider = getIt<NewsProvider>();
+  int _selectedBottomNavIndex = 0;
+  
+  final _newsProvider = GetIt.instance<NewsProvider>();
 
-  void _performSearch(String query) {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _newsProvider.loadNews();
+    });
+  }
+
+
+  void _onSearchSubmitted(String query) {
     setState(() {
       _isSearching = query.isNotEmpty;
     });
-    // Implement search functionality here
+    // TODO: Implementar busca via provider
+    // _newsProvider.searchNews(query);
+  }
+
+  void _onSearchClear() {
+    _searchController.clear();
+    setState(() {
+      _isSearching = false;
+    });
+  }
+
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedBottomNavIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        // Home - já estamos aqui
+        break;
+      case 1:
+        _showFeatureComingSoon('Explore');
+        break;
+      case 2:
+        _showFeatureComingSoon('Saved');
+        break;
+      case 3:
+        _showFeatureComingSoon('Profile');
+        break;
+    }
+  }
+
+  void _showFeatureComingSoon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature - Em breve!'),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -39,204 +82,307 @@ class _HomeViewState extends State<HomeView> {
   }
 
   @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _newsProvider.fetchNews(NewsCategory.general);
-    });
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: NestedScrollView(
-          headerSliverBuilder:
-              (context, innerBoxScrolled) => [
-                SliverAppBar(
-                  title: const Text(
-                    'News',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  floating: true,
-                  actions: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        "N",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+          headerSliverBuilder: (context, innerBoxScrolled) => [
+            _buildAppBar(),
+          ],
+          body: _buildBody(),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavigation(),
+    );
+  }
+
+
+  Widget _buildAppBar() {
+    return SliverAppBar(
+      title: const Text(
+        'News',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+      floating: true,
+      actions: [
+        CircleAvatar(
+          backgroundColor: Colors.white,
+          child: Text(
+            "N",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: _buildSearchBar(),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search news...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _onSearchClear,
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.grey[200]
+              : Colors.grey[800],
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        ),
+        onSubmitted: _onSearchSubmitted,
+        textInputAction: TextInputAction.search,
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _newsProvider.isLoading,
+      builder: (context, isLoading, _) {
+        if (isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return ValueListenableBuilder<List<Article>>(
+          valueListenable: _newsProvider.newsCategory,
+          builder: (context, articles, _) {
+            if (_newsProvider.errorMessage.isNotEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Erro: ${_newsProvider.errorMessage}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => _newsProvider.refresh(),
+                      child: const Text('Tentar novamente'),
                     ),
                   ],
-                  bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(70),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search news...',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon:
-                              _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() {
-                                        _isSearching = false;
-                                      });
-                                    },
-                                  )
-                                  : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.grey[200]
-                                  : Colors.grey[800],
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                          ),
-                        ),
-                        onSubmitted: _performSearch,
-                        textInputAction: TextInputAction.search,
-                      ),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CategoryWidget(newsProvider: _newsProvider),
+                  const SizedBox(height: 16),
+                  _buildSectionHeader(),
+                  const SizedBox(height: 10),
+                  Expanded(child: _buildNewsList(articles)),
+                  const SizedBox(height: 10),
+                  _buildPaginationControls(),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionHeader() {
+    return Row(
+      children: const [
+        Icon(Icons.newspaper, color: Colors.blue),
+        SizedBox(width: 8),
+        Text(
+          "Latest News",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewsList(List<Article> articles) {
+    if (articles.isEmpty) {
+      return const Center(
+        child: Text('Nenhuma notícia encontrada.'),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: articles.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => _buildNewsCard(articles[index]),
+    );
+  }
+
+  Widget _buildNewsCard(Article article) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.grey[100],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildNewsImage(article.urlToImage),
+          const SizedBox(width: 12),
+          Expanded(child: _buildNewsContent(article)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNewsImage(String? imageUrl) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(18),
+        bottomLeft: Radius.circular(18),
+      ),
+      child: Image.network(
+        imageUrl ?? 'https://via.placeholder.com/90x70.png?text=No+Image',
+        height: 90,
+        width: 90,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: Colors.grey[300],
+          height: 90,
+          width: 90,
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewsContent(Article article) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            article.title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            article.description ?? 'Description not available',
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          _buildNewsMetadata(article),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNewsMetadata(Article article) {
+    return Row(
+      children: [
+        Icon(Icons.source, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(
+          StringHelper.formatNewsSource(article.source.id ?? 'Unknown source'),
+          style: const TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+        const SizedBox(width: 12),
+        Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(
+          "${DateHelper.formatPublicationTimeDifference(article.publishedAt)} ago",
+          style: const TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return ValueListenableBuilder<int>(
+      valueListenable: _newsProvider.currentPage,
+      builder: (context, currentPage, _) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_newsProvider.canGoPrevious) ...[
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _newsProvider.previousPage(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: Text('Página anterior (${currentPage - 1})'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.blue,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
                 ),
-              ],
-          body: Consumer<NewsProvider>(
-            builder: (BuildContext context, NewsProvider value, Widget? child) {
-              return value.newsCategory.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CategoryWidget(),
-                        const SizedBox(height: 8),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Latest News",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: value.newsCategory.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Container(
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18),
-                                    color: Colors.grey[200], // change to white,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        height: 70,
-                                        width: 90,
-                                        child: Image.network(
-                                          '${value.newsCategory[index].urlToImage}',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              value
-                                                      .newsCategory[index]
-                                                      .description ??
-                                                  'Description not available',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              StringHelper.formatNewsSource(
-                                                value
-                                                        .newsCategory[index]
-                                                        .source
-                                                        .id ??
-                                                    'Unknown source',
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            SizedBox(width: 5),
-                                            Text(
-                                              "${DateHelper.formatPublicationTimeDifference(value.newsCategory[index].publishedAt)}  ago",
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            physics: const BouncingScrollPhysics(),
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(bottom: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-            },
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        onTap: (index) {
-          setState(() {
-            _currentPage = index;
-          });
-          // Add navigation logic as needed
-        },
-      ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _newsProvider.canGoNext ? () => _newsProvider.nextPage() : null,
+                icon: const Icon(Icons.arrow_forward),
+                label: Text('Próxima página (${currentPage + 1})'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomNavigation() {
+    return BottomNavigationBar(
+      currentIndex: _selectedBottomNavIndex,
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
+      onTap: _onBottomNavTap,
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
+        BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+      ],
     );
   }
 }

@@ -7,63 +7,63 @@ class NewsRepository {
 
   NewsRepository(this._apiService);
 
-  Future<List<Article>> getNews() async {
+  Future<List<Article>> getNews(int page) async {
     try {
-      return await _apiService.getNews();
+      return await _apiService.getNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getBusinessNews() async {
+  Future<List<Article>> getBusinessNews(int page) async {
     try {
-      return await _apiService.getBusinessNews();
+      return await _apiService.getBusinessNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getEntertainmentNews() async {
+  Future<List<Article>> getEntertainmentNews(int page) async {
     try {
-      return await _apiService.getEntertainmentNews();
+      return await _apiService.getEntertainmentNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getHealthNews() async {
+  Future<List<Article>> getHealthNews(int page) async {
     try {
-      return await _apiService.getHealthNews();
+      return await _apiService.getHealthNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getScienceNews() async {
+  Future<List<Article>> getScienceNews(int page) async {
     try {
-      return await _apiService.getScienceNews();
+      return await _apiService.getScienceNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getSportsNews() async {
+  Future<List<Article>> getSportsNews(int page) async {
     try {
-      return await _apiService.getSportsNews();
+      return await _apiService.getSportsNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
 
-  Future<List<Article>> getTechnologyNews() async {
+  Future<List<Article>> getTechnologyNews(int page) async {
     try {
-      return await _apiService.getTechnologyNews();
+      return await _apiService.getTechnologyNews(page);
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
