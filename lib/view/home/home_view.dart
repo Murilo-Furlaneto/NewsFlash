@@ -324,51 +324,60 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildPaginationControls() {
-    return ValueListenableBuilder<int>(
-      valueListenable: _newsProvider.currentPage,
-      builder: (context, currentPage, _) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (_newsProvider.canGoPrevious) ...[
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _newsProvider.previousPage(),
-                  icon: const Icon(Icons.arrow_back),
-                  label: Text('Página anterior (${currentPage - 1})'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[200],
-                    foregroundColor: Colors.blue,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                ),
+ Widget _buildPaginationControls() {
+  return ValueListenableBuilder<int>(
+    valueListenable: _newsProvider.currentPage,
+    builder: (context, currentPage, _) {
+      final canGoPrev = _newsProvider.canGoPrevious;
+      final canGoNext = _newsProvider.canGoNext;
+
+      return Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.15),
+                blurRadius: 8,
+                offset: Offset(0, 4),
               ),
-              const SizedBox(width: 12),
             ],
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _newsProvider.canGoNext ? () => _newsProvider.nextPage() : null,
-                icon: const Icon(Icons.arrow_forward),
-                label: Text('Próxima página (${currentPage + 1})'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back_ios_new_rounded),
+                color: canGoPrev ? Colors.blueAccent : Colors.grey.shade400,
+                onPressed: canGoPrev ? () => _newsProvider.previousPage() : null,
+                tooltip: canGoPrev ? 'Página anterior' : null,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Página $currentPage',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+              SizedBox(width: 12),
+              IconButton(
+                icon: Icon(Icons.arrow_forward_ios_rounded),
+                color: canGoNext ? Colors.blueAccent : Colors.grey.shade400,
+                onPressed: canGoNext ? () => _newsProvider.nextPage() : null,
+                tooltip: canGoNext ? 'Próxima página' : null,
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildBottomNavigation() {
     return BottomNavigationBar(
