@@ -29,12 +29,11 @@ class _HomeViewState extends State<HomeView> {
   }
 
 
-  void _onSearchSubmitted(String query) {
+  void _onSearchSubmitted(String query) async {
     setState(() {
       _isSearching = query.isNotEmpty;
     });
-    // TODO: Implementar busca via provider
-    // _newsProvider.searchNews(query);
+   await _newsProvider.searchNews(query, _newsProvider.currentPage.value);
   }
 
   void _onSearchClear() {

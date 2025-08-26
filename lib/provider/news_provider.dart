@@ -23,6 +23,12 @@ class NewsProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
 
 
+  Future<List<Article>> searchNews(String query, int page) async {
+    final result = await _newsRepository.searchNews(query, page);
+    _newsCategory.value = List.from(result);
+    return result;
+  }
+
   Future<void> loadNews([NewsCategory? category, int? page]) async {
     final targetCategory = category ?? _currentCategory.value;
     final targetPage = page ?? _currentPage.value;

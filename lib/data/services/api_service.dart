@@ -28,6 +28,36 @@ class ApiService {
     }
   }
 
+  Future<List<Article>> searchNews(String query, int page) async {
+    try {
+      final response = await _httpClient.get(
+        Uri.parse('${_baseUrl}everything?q=$query&page=$page&apiKey=$_apiKey'),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonData = json.decode(response.body);
+        return Article.fromList(jsonData["articles"]);
+      } else {
+        _logError(
+          "searchNews - Falha com código de status: ${response.statusCode}",
+        );
+        throw Exception("Erro ao carregar as notícias: ${response.statusCode}");
+      }
+    } on SocketException {
+      _logError("searchNews - Erro: Sem conexão com a Internet");
+      throw Exception("Sem conexão com a Internet");
+    } on HttpException {
+      _logError("searchNews - Erro: Não foi possível encontrar as notícias");
+      throw Exception("Não foi possível encontrar as notícias");
+    } on FormatException {
+      _logError("searchNews - Erro: Formato de resposta inválido");
+      throw Exception("Formato de resposta inválido");
+    } catch (e) {
+      _logError("searchNews - Erro inesperado: ${e.toString()}");
+      throw Exception("Erro inesperado: $e");
+    }
+  }
+
   Future<List<Article>> getNewsByCategory(
     NewsCategory category,
     int page,

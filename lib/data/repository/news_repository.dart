@@ -69,4 +69,13 @@ class NewsRepository {
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
+
+  Future<List<Article>> searchNews(String query, int page) async {
+    try {
+      return await _apiService.searchNews(query, page);
+    } catch (e) {
+      log("Erro ao carregar as notícias: $e");
+      throw Exception("Erro ao carregar as notícias: $e");
+    }
+  }
 }
