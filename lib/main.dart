@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         title: 'News Flash',
         theme: ThemeData(
           primaryColor: Colors.blue,
-          //colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
         routes: AppRoutes().routes,
         initialRoute: AppRoutes.splash,

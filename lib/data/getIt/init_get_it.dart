@@ -7,12 +7,7 @@ import 'package:http/http.dart' as http;
 final getIt = GetIt.instance;
 
 void setUp() {
-  getIt.registerLazySingleton<NewsRepository>(
-    () => NewsRepository(getIt<ApiService>()),
-  );
-  getIt.registerLazySingleton<ApiService>(
-    () => ApiService(httpClient: http.Client()),
-  );
-
+  getIt.registerLazySingleton<NewsRepository>(() => NewsRepository(getIt<ApiService>()));
+  getIt.registerLazySingleton<ApiService>(() => ApiService(httpClient: http.Client()));
   getIt.registerSingleton<NewsProvider>(NewsProvider(getIt<NewsRepository>()));
 }

@@ -4,16 +4,17 @@ import 'package:news_flash/data/helper/date_helper.dart';
 import 'package:news_flash/data/helper/string_helper.dart';
 import 'package:news_flash/models/article_model.dart';
 import 'package:news_flash/provider/news_provider.dart';
+import 'package:news_flash/routes/app_routes.dart';
 import 'package:news_flash/widgtes/home/carrossel/category_widget.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   int _selectedBottomNavIndex = 0;
@@ -30,11 +31,20 @@ class _HomeViewState extends State<HomeView> {
 
 
   void _onSearchSubmitted(String query) async {
-    setState(() {
-      _isSearching = query.isNotEmpty;
-    });
-   await _newsProvider.searchNews(query, _newsProvider.currentPage.value);
+  setState(() {
+    _isSearching = true;
+  });
+
+  try {
+    await _newsProvider.searchNews(query, _newsProvider.currentPage.value);
+  } finally {
+    if (mounted) { 
+      setState(() {
+        _isSearching = false;
+      });
+    }
   }
+}
 
   void _onSearchClear() {
     _searchController.clear();
@@ -59,7 +69,7 @@ class _HomeViewState extends State<HomeView> {
         _showFeatureComingSoon('Saved');
         break;
       case 3:
-        _showFeatureComingSoon('Profile');
+        _navigateToPage(AppRoutes.profile);
         break;
     }
   }
@@ -72,6 +82,10 @@ class _HomeViewState extends State<HomeView> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _navigateToPage(String route, {Object? arguments}){
+    Navigator.pushNamed(context, route, arguments: arguments);
   }
 
   @override
@@ -229,7 +243,11 @@ class _HomeViewState extends State<HomeView> {
     return ListView.separated(
       itemCount: articles.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => _buildNewsCard(articles[index]),
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: (){
+          _navigateToPage(AppRoutes.newsDetails, arguments: articles[index]);
+        },
+        child: _buildNewsCard(articles[index])),
     );
   }
 
