@@ -68,9 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         _showFeatureComingSoon('Saved');
         break;
-      case 3:
-        _navigateToPage(AppRoutes.profile);
-        break;
+    
     }
   }
 
