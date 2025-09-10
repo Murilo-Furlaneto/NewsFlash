@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:news_flash/models/article_model.dart';
 
@@ -36,12 +38,12 @@ class _NewsDetailsPageState extends State<NewsDetailsPage>
         _animationController.reverse();
       }
     });
-    // Aqui você pode implementar a lógica para salvar o favorito em banco ou estado global
   }
 
   @override
   Widget build(BuildContext context) {
     article = ModalRoute.of(context)?.settings.arguments as Article;
+    log("Conteudo:${article.content}");
 
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -50,10 +52,10 @@ class _NewsDetailsPageState extends State<NewsDetailsPage>
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        iconTheme: IconThemeData(color: theme.colorScheme.primary),
+        iconTheme: IconThemeData(color: Colors.black),
         title: Text(
           article.source.name,
-          style: textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary),
+          style: textTheme.titleMedium?.copyWith(color: Colors.black),
         ),
         centerTitle: true,
         actions: [

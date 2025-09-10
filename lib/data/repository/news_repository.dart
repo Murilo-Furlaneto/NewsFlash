@@ -1,13 +1,13 @@
 import 'dart:developer';
+import 'package:news_flash/data/model/article_response.dart';
 import 'package:news_flash/data/services/api_service.dart';
-import 'package:news_flash/models/article_model.dart';
 
 class NewsRepository {
   final ApiService _apiService;
 
   NewsRepository(this._apiService);
 
-  Future<List<Article>> getNews(int page) async {
+  Future<ArticleResponse> getNews(int page) async {
     try {
       return await _apiService.getNews(page);
     } catch (e) {
@@ -16,7 +16,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getBusinessNews(int page) async {
+  Future<ArticleResponse> getBusinessNews(int page) async {
     try {
       return await _apiService.getBusinessNews(page);
     } catch (e) {
@@ -25,7 +25,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getEntertainmentNews(int page) async {
+  Future<ArticleResponse> getEntertainmentNews(int page) async {
     try {
       return await _apiService.getEntertainmentNews(page);
     } catch (e) {
@@ -34,7 +34,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getHealthNews(int page) async {
+  Future<ArticleResponse> getHealthNews(int page) async {
     try {
       return await _apiService.getHealthNews(page);
     } catch (e) {
@@ -43,7 +43,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getScienceNews(int page) async {
+  Future<ArticleResponse> getScienceNews(int page) async {
     try {
       return await _apiService.getScienceNews(page);
     } catch (e) {
@@ -52,7 +52,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getSportsNews(int page) async {
+  Future<ArticleResponse> getSportsNews(int page) async {
     try {
       return await _apiService.getSportsNews(page);
     } catch (e) {
@@ -61,7 +61,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> getTechnologyNews(int page) async {
+  Future<ArticleResponse> getTechnologyNews(int page) async {
     try {
       return await _apiService.getTechnologyNews(page);
     } catch (e) {
@@ -70,7 +70,7 @@ class NewsRepository {
     }
   }
 
-  Future<List<Article>> searchNews(String query, int page) async {
+  Future<ArticleResponse> searchNews(String query, int page) async {
     try {
       return await _apiService.searchNews(query, page);
     } catch (e) {

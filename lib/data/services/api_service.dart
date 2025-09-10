@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:news_flash/data/enum/news_category.dart';
 import 'package:news_flash/data/helper/category_helper.dart';
-import 'package:news_flash/models/article_model.dart';
+import 'package:news_flash/data/model/article_response.dart';
 
 class ApiService {
   final http.Client _httpClient;
@@ -28,7 +28,7 @@ class ApiService {
     }
   }
 
-  Future<List<Article>> searchNews(String query, int page) async {
+  Future<ArticleResponse> searchNews(String query, int page) async {
     try {
       final response = await _httpClient.get(
         Uri.parse('${_baseUrl}everything?q=$query&page=$page&apiKey=$_apiKey'),
@@ -36,7 +36,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonData = json.decode(response.body);
-        return Article.fromList(jsonData["articles"]);
+        return ArticleResponse.fromJson(jsonData);
       } else {
         _logError(
           "searchNews - Falha com código de status: ${response.statusCode}",
@@ -58,7 +58,7 @@ class ApiService {
     }
   }
 
-  Future<List<Article>> getNewsByCategory(
+  Future<ArticleResponse> getNewsByCategory(
     NewsCategory category,
     int page,
   ) async {
@@ -73,7 +73,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonData = json.decode(response.body);
-        return Article.fromList(jsonData["articles"]);
+        return ArticleResponse.fromJson(jsonData);
       } else {
         _logError(
           "$methodName - Falha com código de status: ${response.statusCode}",
@@ -99,31 +99,31 @@ class ApiService {
     log("[ApiService] $message");
   }
 
-  Future<List<Article>> getNews(int page) {
+  Future<ArticleResponse> getNews(int page) {
     return getNewsByCategory(NewsCategory.general, page);
   }
 
-  Future<List<Article>> getBusinessNews(int page) {
+  Future<ArticleResponse> getBusinessNews(int page) {
     return getNewsByCategory(NewsCategory.business, page);
   }
 
-  Future<List<Article>> getEntertainmentNews(int page) {
+  Future<ArticleResponse> getEntertainmentNews(int page) {
     return getNewsByCategory(NewsCategory.entertainment, page);
   }
 
-  Future<List<Article>> getHealthNews(int page) {
+  Future<ArticleResponse> getHealthNews(int page) {
     return getNewsByCategory(NewsCategory.health, page);
   }
 
-  Future<List<Article>> getScienceNews(int page) {
+  Future<ArticleResponse> getScienceNews(int page) {
     return getNewsByCategory(NewsCategory.science, page);
   }
 
-  Future<List<Article>> getTechnologyNews(int page) {
+  Future<ArticleResponse> getTechnologyNews(int page) {
     return getNewsByCategory(NewsCategory.technology, page);
   }
 
-  Future<List<Article>> getSportsNews(int page) {
+  Future<ArticleResponse> getSportsNews(int page) {
     return getNewsByCategory(NewsCategory.sports, page);
   }
 

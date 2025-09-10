@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:news_flash/data/helper/date_helper.dart';
 import 'package:news_flash/data/helper/string_helper.dart';
+import 'package:news_flash/data/model/article_response.dart';
 import 'package:news_flash/models/article_model.dart';
 import 'package:news_flash/provider/news_provider.dart';
 import 'package:news_flash/routes/app_routes.dart';
@@ -18,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   int _selectedBottomNavIndex = 0;
-  
+  final ScrollController _scrollController = ScrollController();
   final _newsProvider = GetIt.instance<NewsProvider>();
 
   @override
@@ -60,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (index) {
       case 0:
-        // Home - já estamos aqui
         break;
       case 1:
         _showFeatureComingSoon('Explore');
@@ -203,7 +203,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 10),
                   Expanded(child: _buildNewsList(articles)),
                   const SizedBox(height: 10),
-                  _buildPaginationControls(),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -238,11 +237,18 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        _newsProvider.nextPage();
+      }
+    });
+
     return ListView.separated(
+      controller: _scrollController,
       itemCount: articles.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) => GestureDetector(
-        onTap: (){
+        onTap: () {
           _navigateToPage(AppRoutes.newsDetails, arguments: articles[index]);
         },
         child: _buildNewsCard(articles[index])),
@@ -339,60 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
- Widget _buildPaginationControls() {
-  return ValueListenableBuilder<int>(
-    valueListenable: _newsProvider.currentPage,
-    builder: (context, currentPage, _) {
-      final canGoPrev = _newsProvider.canGoPrevious;
-      final canGoNext = _newsProvider.canGoNext;
-
-      return Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.15),
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded),
-                color: canGoPrev ? Colors.blueAccent : Colors.grey.shade400,
-                onPressed: canGoPrev ? () => _newsProvider.previousPage() : null,
-                tooltip: canGoPrev ? 'Página anterior' : null,
-              ),
-              SizedBox(width: 12),
-              Text(
-                'Página $currentPage',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(width: 12),
-              IconButton(
-                icon: Icon(Icons.arrow_forward_ios_rounded),
-                color: canGoNext ? Colors.blueAccent : Colors.grey.shade400,
-                onPressed: canGoNext ? () => _newsProvider.nextPage() : null,
-                tooltip: canGoNext ? 'Próxima página' : null,
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
+ 
 
   Widget _buildBottomNavigation() {
     return BottomNavigationBar(

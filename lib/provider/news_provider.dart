@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:news_flash/data/enum/news_category.dart';
+import 'package:news_flash/data/model/article_response.dart';
 import 'package:news_flash/data/repository/news_repository.dart';
 import 'package:news_flash/models/article_model.dart';
 
@@ -23,9 +24,9 @@ class NewsProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
 
 
-  Future<List<Article>> searchNews(String query, int page) async {
+  Future<ArticleResponse> searchNews(String query, int page) async {
     final result = await _newsRepository.searchNews(query, page);
-    _newsCategory.value = List.from(result);
+    _newsCategory.value = List.from(result.articles);
     return result;
   }
 
@@ -40,11 +41,11 @@ class NewsProvider extends ChangeNotifier {
     try {
       final news = await _fetchNewsByCategory(targetCategory, targetPage);
       
-      _newsCategory.value = List.from(news);
+      _newsCategory.value = List.from(news.articles);
       _currentCategory.value = targetCategory;
       _currentPage.value = targetPage;
       
-      log("Notícias carregadas: ${news.length} itens - Categoria: ${targetCategory.name} - Página: $targetPage");
+      log("Notícias carregadas: ${news.totalResults} itens - Categoria: ${targetCategory.name} - Página: $targetPage");
     } catch (e) {
       _errorMessage = "Erro ao carregar notícias: $e";
       log("Erro ao carregar notícias: $e");
@@ -86,7 +87,7 @@ class NewsProvider extends ChangeNotifier {
   bool get canGoPrevious => _currentPage.value > 1;
 
 
-  Future<List<Article>> _fetchNewsByCategory(NewsCategory category, int page) async {
+  Future<ArticleResponse> _fetchNewsByCategory(NewsCategory category, int page) async {
     switch (category) {
       case NewsCategory.business:
         return _newsRepository.getBusinessNews(page);
