@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:news_flash/data/helper/date_helper.dart';
 import 'package:news_flash/data/helper/string_helper.dart';
-import 'package:news_flash/data/model/article_response.dart';
 import 'package:news_flash/models/article_model.dart';
-import 'package:news_flash/provider/news_provider.dart';
-import 'package:news_flash/routes/app_routes.dart';
+import 'package:news_flash/provider/news/news_provider.dart';
+import 'package:news_flash/view/news/favorite_news_page.dart';
+import 'package:news_flash/view/news/news_details_page.dart';
 import 'package:news_flash/widgtes/home/carrossel/category_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,22 +55,36 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onBottomNavTap(int index) {
-    setState(() {
-      _selectedBottomNavIndex = index;
-    });
+  setState(() {
+    _selectedBottomNavIndex = index;
+  });
 
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        _showFeatureComingSoon('Explore');
-        break;
-      case 2:
-        _showFeatureComingSoon('Saved');
-        break;
-    
-    }
+  switch (index) {
+    case 0:
+      if(!mounted){
+        Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+      }
+      break;
+    case 1:
+      _showFeatureComingSoon('Explore');
+      break;
+    case 2:
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FavoriteNewsPage(newsProvider: _newsProvider),
+        ),
+      ).then((_) {
+        setState(() {
+          _selectedBottomNavIndex = 0;
+        });
+      });
+      break;
   }
+}
 
   void _showFeatureComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -80,10 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
-  }
-
-  void _navigateToPage(String route, {Object? arguments}){
-    Navigator.pushNamed(context, route, arguments: arguments);
   }
 
   @override
@@ -249,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) => GestureDetector(
         onTap: () {
-          _navigateToPage(AppRoutes.newsDetails, arguments: articles[index]);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => NewsDetailsPage(article: articles[index], newsProvider: _newsProvider,)));
         },
         child: _buildNewsCard(articles[index])),
     );

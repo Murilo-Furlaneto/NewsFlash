@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:news_flash/data/getIt/init_get_it.dart';
-import 'package:news_flash/provider/news_provider.dart';
+import 'package:news_flash/provider/news/news_provider.dart';
 import 'package:news_flash/provider/theme/theme_provider.dart';
 import 'package:news_flash/routes/app_routes.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => getIt<NewsProvider>()),
         ChangeNotifierProvider(create: (context) => ThemeProvider(preferences)),
       ],
       child: Consumer<ThemeProvider>(

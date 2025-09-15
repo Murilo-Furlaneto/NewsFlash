@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:news_flash/models/news_response_model.dart';
 
 class CarrosselWidget extends StatefulWidget {
   const CarrosselWidget({super.key});
@@ -10,7 +9,6 @@ class CarrosselWidget extends StatefulWidget {
 
 class _CarrosselWidgetState extends State<CarrosselWidget> {
   final PageController _pageController = PageController(viewportFraction: 0.8);
-  int _currentPage = 0;
 
   @override
   void dispose() {
@@ -43,7 +41,6 @@ class _CarrosselWidgetState extends State<CarrosselWidget> {
               controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
-                  _currentPage = index;
                 });
               },
               itemBuilder: (context, index) {

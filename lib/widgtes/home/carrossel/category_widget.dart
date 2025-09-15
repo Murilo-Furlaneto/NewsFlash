@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:news_flash/data/enum/news_category.dart';
-import 'package:news_flash/provider/news_provider.dart';
+import 'package:news_flash/provider/news/news_provider.dart';
 import 'package:news_flash/widgtes/home/carrossel/category_button.dart';
 
 class CategoryWidget extends StatelessWidget {

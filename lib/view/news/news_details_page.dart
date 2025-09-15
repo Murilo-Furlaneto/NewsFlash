@@ -1,10 +1,13 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:news_flash/models/article_model.dart';
+import 'package:news_flash/provider/news/news_provider.dart';
+import 'package:news_flash/view/news/article_webview_page.dart';
 
 class NewsDetailsPage extends StatefulWidget {
-  const NewsDetailsPage({super.key});
+  const NewsDetailsPage({super.key, required this.article, required this.newsProvider});
+
+  final Article article;
+  final NewsProvider newsProvider;
 
   @override
   State<NewsDetailsPage> createState() => _NewsDetailsPageState();
@@ -12,15 +15,14 @@ class NewsDetailsPage extends StatefulWidget {
 
 class _NewsDetailsPageState extends State<NewsDetailsPage>
     with SingleTickerProviderStateMixin {
-  late Article article;
   bool isFavorited = false;
   late AnimationController _animationController;
 
   @override
   void initState() {
+    super.initState();
     _animationController =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    super.initState();
   }
 
   @override
@@ -37,26 +39,19 @@ class _NewsDetailsPageState extends State<NewsDetailsPage>
       } else {
         _animationController.reverse();
       }
+      widget.newsProvider.toggleFavorite(widget.article);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    article = ModalRoute.of(context)?.settings.arguments as Article;
-    log("Conteudo:${article.content}");
-
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final article = widget.article;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-        title: Text(
-          article.source.name,
-          style: textTheme.titleMedium?.copyWith(color: Colors.black),
-        ),
+        title: Text(article.source.name),
         centerTitle: true,
         actions: [
           IconButton(
@@ -122,28 +117,54 @@ class _NewsDetailsPageState extends State<NewsDetailsPage>
             const SizedBox(height: 12),
             Row(
               children: [
-                if (article.author != null)
+                if (article.author != null && article.author!.isNotEmpty)
                   Expanded(
                     child: Text(
                       'Por ${article.author}',
-                      style: textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(fontStyle: FontStyle.italic),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 Text(
                   article.publishedAt.split('T').first,
-                  style: textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.outline),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             Text(
-              article.content ?? article.description ?? 'Conteúdo indisponível.',
+              article.description ?? 'Resumo indisponível.',
               style: textTheme.bodyLarge?.copyWith(height: 1.4),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 32),
+            if (article.url.isNotEmpty)
+              Center(
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: const Text('Ler notícia completa'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    textStyle: textTheme.titleMedium,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ArticleWebViewPage(
+                          title: article.title,
+                          url: article.url,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 }
+
