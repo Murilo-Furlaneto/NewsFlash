@@ -46,4 +46,12 @@ class Article {
       'content': content,
     };
   }
+
+  static List<Article> fromList(List <dynamic> response) {
+    if (response.isEmpty) Exception("List is empty");
+
+    return response.map((article) {
+      return Article.fromJson(article);
+    }).toList();
+  }
 }
