@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:news_flash/cubit/news/news_cubit.dart';
+import 'package:news_flash/cubit/news/news_state.dart';
 import 'package:news_flash/data/helper/date_helper.dart';
 import 'package:news_flash/data/helper/string_helper.dart';
 import 'package:news_flash/models/article_model.dart';
-import 'package:news_flash/provider/news/news_provider.dart';
-import 'package:news_flash/view/news/favorite_news_page.dart';
 import 'package:news_flash/view/news/news_details_page.dart';
 import 'package:news_flash/widgtes/home/carrossel/category_widget.dart';
 
@@ -17,83 +18,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-  int _selectedBottomNavIndex = 0;
   final ScrollController _scrollController = ScrollController();
-  final _newsProvider = GetIt.instance<NewsProvider>();
+  final _cubit = GetIt.instance<NewsCubit>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _newsProvider.loadNews();
+      _cubit.loadNews();
     });
   }
 
-
   void _onSearchSubmitted(String query) async {
-  setState(() {
-    _isSearching = true;
-  });
-
-  try {
-    await _newsProvider.searchNews(query, _newsProvider.currentPage.value);
-  } finally {
-    if (mounted) { 
-      setState(() {
-        _isSearching = false;
-      });
-    }
+    try {
+      await _cubit.searchNews(query, _cubit.currentPage);
+    } finally {}
   }
-}
 
   void _onSearchClear() {
     _searchController.clear();
-    setState(() {
-      _isSearching = false;
-    });
-  }
-
-  void _onBottomNavTap(int index) {
-  setState(() {
-    _selectedBottomNavIndex = index;
-  });
-
-  switch (index) {
-    case 0:
-      if(!mounted){
-        Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-      }
-      break;
-    case 1:
-      _showFeatureComingSoon('Explore');
-      break;
-    case 2:
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FavoriteNewsPage(newsProvider: _newsProvider),
-        ),
-      ).then((_) {
-        setState(() {
-          _selectedBottomNavIndex = 0;
-        });
-      });
-      break;
-  }
-}
-
-  void _showFeatureComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature - Em breve!'),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   @override
@@ -108,16 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxScrolled) => [
-            _buildAppBar(),
-          ],
+          headerSliverBuilder: (context, innerBoxScrolled) => [_buildAppBar()],
           body: _buildBody(),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
-
 
   Widget _buildAppBar() {
     return SliverAppBar(
@@ -131,10 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.white,
           child: Text(
             "N",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
       ],
@@ -176,49 +112,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBody() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _newsProvider.isLoading,
-      builder: (context, isLoading, _) {
-        if (isLoading) {
+    return BlocBuilder(
+      bloc: _cubit,
+      builder: (context, state) {
+        if (state is LoadingNewsState) {
           return const Center(child: CircularProgressIndicator());
-        }
-
-        return ValueListenableBuilder<List<Article>>(
-          valueListenable: _newsProvider.newsCategory,
-          builder: (context, articles, _) {
-            if (_newsProvider.errorMessage.isNotEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Erro: ${_newsProvider.errorMessage}'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => _newsProvider.refresh(),
-                      child: const Text('Tentar novamente'),
-                    ),
-                  ],
+        } else if (state is ErrorNewsState) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Erro: ${state.errorMessage}'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => _cubit.refresh(),
+                  child: const Text('Tentar novamente'),
                 ),
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CategoryWidget(newsProvider: _newsProvider),
-                  const SizedBox(height: 16),
-                  _buildSectionHeader(),
-                  const SizedBox(height: 10),
-                  Expanded(child: _buildNewsList(articles)),
-                  const SizedBox(height: 10),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            );
-          },
-        );
+              ],
+            ),
+          );
+        } else {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CategoryWidget(cubit: _cubit),
+                const SizedBox(height: 16),
+                _buildSectionHeader(),
+                const SizedBox(height: 10),
+                Expanded(child: _buildNewsList(_cubit.newsCategory)),
+                const SizedBox(height: 10),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        }
       },
     );
   }
@@ -242,14 +171,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNewsList(List<Article> articles) {
     if (articles.isEmpty) {
-      return const Center(
-        child: Text('Nenhuma notícia encontrada.'),
-      );
+      return const Center(child: Text('Nenhuma notícia encontrada.'));
     }
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        _newsProvider.nextPage();
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _cubit.nextPage();
       }
     });
 
@@ -259,9 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) => GestureDetector(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => NewsDetailsPage(article: articles[index], newsProvider: _newsProvider,)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NewsDetailsPage(
+                article: articles[index],
+                cubit: _cubit,
+              ),
+            ),
+          );
         },
-        child: _buildNewsCard(articles[index])),
+        child: _buildNewsCard(articles[index]),
+      ),
     );
   }
 
@@ -351,24 +288,6 @@ class _HomeScreenState extends State<HomeScreen> {
           "${DateHelper.formatPublicationTimeDifference(article.publishedAt)} ago",
           style: const TextStyle(fontSize: 13, color: Colors.grey),
         ),
-      ],
-    );
-  }
-
- 
-
-  Widget _buildBottomNavigation() {
-    return BottomNavigationBar(
-      currentIndex: _selectedBottomNavIndex,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      onTap: _onBottomNavTap,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-        BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
     );
   }

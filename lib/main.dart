@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:news_flash/cubit/news/news_cubit.dart';
+import 'package:news_flash/cubit/theme/theme_cubit.dart';
 import 'package:news_flash/data/getIt/init_get_it.dart';
-import 'package:news_flash/provider/news/news_provider.dart';
-import 'package:news_flash/provider/theme/theme_provider.dart';
+import 'package:news_flash/data/repository/news_repository.dart';
 import 'package:news_flash/routes/app_routes.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -21,12 +22,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider(preferences)),
+        BlocProvider(create: (_) => NewsCubit(getIt<NewsRepository>())),
+        BlocProvider(create: (_) => ThemeCubit(preferences)),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, state) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'News Flash',
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
               primaryColor: Colors.blue,
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
             ),
-            themeMode: themeProvider.themeMode,
+            themeMode: state.themeMode,
             routes: AppRoutes().routes,
             initialRoute: AppRoutes.splash,
           );

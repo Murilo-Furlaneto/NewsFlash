@@ -19,11 +19,11 @@ class ApiService {
     final String categoryName = CategoryHelper().convertCategoryName(category);
     if (category == NewsCategory.general) {
       String url =
-          '${_baseUrl}everything?q=$categoryName&page=$page&apiKey=$_apiKey';
+          '${_baseUrl}top-headlines?category=$categoryName&page=$page&apiKey=$_apiKey';
       return url;
     } else {
       String url =
-          '${_baseUrl}everything?q=$categoryName&page=$page&apiKey=$_apiKey';
+          '${_baseUrl}top-headlines?category=$categoryName&page=$page&apiKey=$_apiKey';
       return url;
     }
   }
@@ -125,6 +125,36 @@ class ApiService {
 
   Future<ArticleResponse> getSportsNews(int page) {
     return getNewsByCategory(NewsCategory.sports, page);
+  }
+
+  Future<ArticleResponse> getTopHeadlines(int page) async {
+    try {
+      final response = await _httpClient.get(
+        Uri.parse('${_baseUrl}top-headlines?country=us&page=$page&apiKey=$_apiKey'),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonData = json.decode(response.body);
+        return ArticleResponse.fromJson(jsonData);
+      } else {
+        _logError(
+          "getTopHeadlines - Falha com código de status: ${response.statusCode}",
+        );
+        throw Exception("Erro ao carregar as notícias: ${response.statusCode}");
+      }
+    } on SocketException {
+      _logError("getTopHeadlines - Erro: Sem conexão com a Internet");
+      throw Exception("Sem conexão com a Internet");
+    } on HttpException {
+      _logError("getTopHeadlines - Erro: Não foi possível encontrar as notícias");
+      throw Exception("Não foi possível encontrar as notícias");
+    } on FormatException {
+      _logError("getTopHeadlines - Erro: Formato de resposta inválido");
+      throw Exception("Formato de resposta inválido");
+    } catch (e) {
+      _logError("getTopHeadlines - Erro inesperado: ${e.toString()}");
+      throw Exception("Erro inesperado: $e");
+    }
   }
 
   void dispose() {

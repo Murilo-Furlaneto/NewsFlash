@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:news_flash/cubit/news/news_cubit.dart';
 import 'package:news_flash/models/article_model.dart';
-import 'package:news_flash/provider/news/news_provider.dart';
 import 'package:news_flash/view/news/article_webview_page.dart';
 
 class NewsDetailsPage extends StatefulWidget {
-  const NewsDetailsPage({super.key, required this.article, required this.newsProvider});
+  const NewsDetailsPage({super.key, required this.article, required this.cubit});
 
   final Article article;
-  final NewsProvider newsProvider;
+  final NewsCubit cubit;
 
   @override
   State<NewsDetailsPage> createState() => _NewsDetailsPageState();
@@ -39,7 +39,7 @@ class _NewsDetailsPageState extends State<NewsDetailsPage>
       } else {
         _animationController.reverse();
       }
-      widget.newsProvider.toggleFavorite(widget.article);
+      widget.cubit.toggleFavorite(widget.article);
     });
   }
 

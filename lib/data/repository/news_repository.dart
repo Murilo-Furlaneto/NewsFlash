@@ -78,4 +78,13 @@ class NewsRepository {
       throw Exception("Erro ao carregar as notícias: $e");
     }
   }
+
+  Future<ArticleResponse> getTopHeadlines(int page) async {
+    try {
+      return await _apiService.getTopHeadlines(page);
+    } catch (e) {
+      log("Erro ao carregar as notícias: $e");
+      throw Exception("Erro ao carregar as notícias: $e");
+    }
+  }
 }
