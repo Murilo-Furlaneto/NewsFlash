@@ -1,4 +1,4 @@
-import 'package:news_flash/models/article_model.dart';
+import 'package:news_flash/domain/models/article_model.dart';
 
 class ArticleResponse {
   final String status;

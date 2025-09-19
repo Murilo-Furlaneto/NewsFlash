@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:news_flash/data/enum/news_category.dart';
-import 'package:news_flash/data/helper/category_helper.dart';
+import 'package:news_flash/utils/enum/news_category.dart';
+import 'package:news_flash/utils/helper/category_helper.dart';
 import 'package:news_flash/data/model/article_response.dart';
 
 class ApiService {
@@ -43,16 +42,7 @@ class ApiService {
         );
         throw Exception("Erro ao carregar as notícias: ${response.statusCode}");
       }
-    } on SocketException {
-      _logError("searchNews - Erro: Sem conexão com a Internet");
-      throw Exception("Sem conexão com a Internet");
-    } on HttpException {
-      _logError("searchNews - Erro: Não foi possível encontrar as notícias");
-      throw Exception("Não foi possível encontrar as notícias");
-    } on FormatException {
-      _logError("searchNews - Erro: Formato de resposta inválido");
-      throw Exception("Formato de resposta inválido");
-    } catch (e) {
+    }  catch (e) {
       _logError("searchNews - Erro inesperado: ${e.toString()}");
       throw Exception("Erro inesperado: $e");
     }
@@ -80,16 +70,7 @@ class ApiService {
         );
         throw Exception("Erro ao carregar as notícias: ${response.statusCode}");
       }
-    } on SocketException {
-      _logError("$methodName - Erro: Sem conexão com a Internet");
-      throw Exception("Sem conexão com a Internet");
-    } on HttpException {
-      _logError("$methodName - Erro: Não foi possível encontrar as notícias");
-      throw Exception("Não foi possível encontrar as notícias");
-    } on FormatException {
-      _logError("$methodName - Erro: Formato de resposta inválido");
-      throw Exception("Formato de resposta inválido");
-    } catch (e) {
+    }  catch (e) {
       _logError("$methodName - Erro inesperado: ${e.toString()}");
       throw Exception("Erro inesperado: $e");
     }
@@ -142,15 +123,6 @@ class ApiService {
         );
         throw Exception("Erro ao carregar as notícias: ${response.statusCode}");
       }
-    } on SocketException {
-      _logError("getTopHeadlines - Erro: Sem conexão com a Internet");
-      throw Exception("Sem conexão com a Internet");
-    } on HttpException {
-      _logError("getTopHeadlines - Erro: Não foi possível encontrar as notícias");
-      throw Exception("Não foi possível encontrar as notícias");
-    } on FormatException {
-      _logError("getTopHeadlines - Erro: Formato de resposta inválido");
-      throw Exception("Formato de resposta inválido");
     } catch (e) {
       _logError("getTopHeadlines - Erro inesperado: ${e.toString()}");
       throw Exception("Erro inesperado: $e");
@@ -162,7 +134,6 @@ class ApiService {
   }
 }
 
-/// Extensão para capitalizar strings
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1)}";

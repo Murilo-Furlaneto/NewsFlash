@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:news_flash/cubit/news/news_cubit.dart';
-import 'package:news_flash/cubit/theme/theme_cubit.dart';
-import 'package:news_flash/data/getIt/init_get_it.dart';
+import 'package:news_flash/routing/routes/app_routes.dart';
+import 'package:news_flash/ui/features/home/view_model/cubit/news/news_cubit.dart';
+import 'package:news_flash/config/di/init_get_it.dart';
 import 'package:news_flash/data/repository/news_repository.dart';
-import 'package:news_flash/routes/app_routes.dart';
+import 'package:news_flash/ui/features/theme/view_model/theme/theme_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
