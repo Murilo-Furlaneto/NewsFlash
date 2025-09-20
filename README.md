@@ -38,7 +38,7 @@ O **NewsFlash App** é um aplicativo Flutter que oferece acesso rápido e intuit
 
 - **Frontend:** Flutter (Dart)
 - **Gerenciamento de Estado:** Cubit
-- **Persistência Local:** SQLite
+- **Persistência Local:** Hive
 - **API de Notícias:** NewsAPI.org
 - **Outros:** share_plus (compartilhamento), notificações locais (futuro)
 
