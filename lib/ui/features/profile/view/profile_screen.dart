@@ -23,12 +23,12 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             const Text(
-              'John Doe', // TODO: Replace with user name
+              'User', // TODO: Replace with user name
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
             const Text(
-              'john.doe@example.com', // TODO: Replace with user email
+              'useremail@example.com', // TODO: Replace with user email
               style: TextStyle(fontSize: 16.0, color: Colors.grey),
             ),
             const SizedBox(height: 32.0),

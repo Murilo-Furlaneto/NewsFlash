@@ -27,3 +27,9 @@ class LoadedTopHeadlinesState extends NewsState {
 
   LoadedTopHeadlinesState(this.topHeadlines);
 }
+
+class LoadedFavoriteNewsState extends NewsState {
+  final List<Article> favoriteNews;
+
+  LoadedFavoriteNewsState(this.favoriteNews);
+}

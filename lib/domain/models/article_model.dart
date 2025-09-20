@@ -1,13 +1,25 @@
 import 'package:news_flash/domain/models/source_model.dart';
+import 'package:hive/hive.dart';
 
+part 'article_model.g.dart';
+
+@HiveType(typeId: 0)
 class Article {
+  @HiveField(0)
   final Source source;
+  @HiveField(1)
   final String? author;
+  @HiveField(2)
   final String title;
+  @HiveField(3)
   final String? description;
+  @HiveField(4)
   final String url;
+  @HiveField(5)
   final String? urlToImage;
+  @HiveField(6)
   final String publishedAt;
+  @HiveField(7)
   final String? content;
 
   Article({
@@ -47,7 +59,7 @@ class Article {
     };
   }
 
-  static List<Article> fromList(List <dynamic> response) {
+  static List<Article> fromList(List<dynamic> response) {
     if (response.isEmpty) Exception("List is empty");
 
     return response.map((article) {

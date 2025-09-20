@@ -47,8 +47,8 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           HomeScreen(),
           ExploreScreen(),
-          FavoriteNewsPage(cubit: getIt<NewsCubit>(),),
-          const ProfileScreen(),
+          FavoriteNewsPage(),
+  //        const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -61,7 +61,7 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
           BottomNavigationBarItem(icon: Icon(Icons.bookmark), label: 'Saved'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+       //   BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

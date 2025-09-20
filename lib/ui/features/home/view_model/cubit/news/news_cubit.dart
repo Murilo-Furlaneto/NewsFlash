@@ -12,15 +12,15 @@ class NewsCubit extends Cubit<NewsState> {
 
   final NewsRepository _newsRepository;
 
-  List<Article> _newsCategory = [];
+  final List<Article> _newsCategory = [];
   NewsCategory _currentCategory = NewsCategory.general;
   int _currentPage = 1;
   int _topHeadlinesCurrentPage = 1;
   List<Article> _favoriteNews = [];
-  List<Article> _topHeadlines = [];
+  final List<Article> _topHeadlines = [];
 
   List<Article> get newsCategory => _newsCategory;
-  List<Article> get favoriteNews => _favoriteNews;
+  List<Article> get favoriteNews => _favoriteNews.toSet().toList();
   List<Article> get topHeadlines => _topHeadlines;
   NewsCategory get currentCategory => _currentCategory;
   int get currentPage => _currentPage;
@@ -105,15 +105,44 @@ class NewsCubit extends Cubit<NewsState> {
 
     if (isFavorite) {
       updatedList.remove(article);
+      deleteFavoriteNews(article);
     } else {
       updatedList.add(article);
+      addFavoriteNews(article);
     }
 
     _favoriteNews = updatedList;
   }
 
-  void deleteFavoriteNews(Article article) {
-    _favoriteNews = _favoriteNews.where((a) => a != article).toList();
+  Future<void> getFavoriteNews() async {
+    emit(LoadingNewsState());
+    try {
+      final data = await _newsRepository.getFavoriteNews();
+      _favoriteNews.clear();
+      _favoriteNews.addAll(data);
+      emit(LoadedFavoriteNewsState(List.from(_favoriteNews)));
+    } catch (e) {
+      emit(ErrorNewsState(e.toString()));
+    }
+  }
+
+  Future<void> addFavoriteNews(Article article) async {
+    await _newsRepository.addFavoriteNews(article);
+    if (!_favoriteNews.any((a) => a.url == article.url)) {
+      _favoriteNews.add(article);
+    }
+    emit(LoadedFavoriteNewsState(List.from(_favoriteNews)));
+  }
+
+  Future<void> deleteFavoriteNews(Article article) async {
+    await _newsRepository.deleteFavoriteNews(article);
+    _favoriteNews.removeWhere((a) => a.url == article.url);
+    emit(LoadedFavoriteNewsState(List.from(_favoriteNews)));
+  }
+
+  Future<void> clearHistory() async {
+    await _newsRepository.clearHistory();
+    _favoriteNews.clear();
   }
 
   void clearCache() {
@@ -144,9 +173,10 @@ class NewsCubit extends Cubit<NewsState> {
   }
 
   @override
-  void dispose() {
+  Future<void> close() async {
     _newsCategory.clear();
     _currentPage = 1;
     _currentCategory = NewsCategory.general;
+    await super.close();
   }
 }

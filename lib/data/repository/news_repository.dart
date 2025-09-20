@@ -1,9 +1,12 @@
 import 'dart:developer';
+import 'package:hive/hive.dart';
 import 'package:news_flash/data/model/article_response.dart';
-import 'package:news_flash/data/services/api_service.dart';
+import 'package:news_flash/data/services/remote/api_service.dart';
+import 'package:news_flash/domain/models/article_model.dart';
 
 class NewsRepository {
   final ApiService _apiService;
+  final Box<Article> _box = Hive.box<Article>('favorite_articles');
 
   NewsRepository(this._apiService);
 
@@ -85,6 +88,43 @@ class NewsRepository {
     } catch (e) {
       log("Erro ao carregar as notícias: $e");
       throw Exception("Erro ao carregar as notícias: $e");
+    }
+  }
+
+  List<Article> getFavoriteNews() {
+    try {
+      log("${_box.values.length}");
+      return _box.values.toList();
+    } catch (e) {
+      log("Erro ao carregar as notícias favoritas: $e");
+      throw Exception("Erro ao carregar as notícias favoritas: $e");
+    }
+  }
+
+  Future<void> addFavoriteNews(Article article) async {
+    try {
+      await _box.put(article.url, article);
+    } catch (e) {
+      log("Erro ao adicionar notícia favorita: $e");
+      throw Exception("Erro ao adicionar notícia favorita: $e");
+    }
+  }
+
+  Future<void> deleteFavoriteNews(Article article) async {
+    try {
+      await _box.delete(article.url);
+    } catch (e) {
+      log("Erro ao remover notícia favorita: $e");
+      throw Exception("Erro ao remover notícia favorita: $e");
+    }
+  }
+
+  Future<void> clearHistory() async {
+    try {
+      await _box.deleteAll(_box.keys);
+    } catch (e) {
+      log("Erro ao limpar histórico: $e");
+      throw Exception("Erro ao limpar histórico: $e");
     }
   }
 }
